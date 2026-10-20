@@ -1,0 +1,495 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Le Petit Fantôme</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@500;700&display=swap">
+<style>
+/* Layout: one centered column. Soft illustrated ghost on top, then the question, then two big round buttons.
+   Colors: lilac and mint ground, lavender ghost, pink cheeks, green Oui, coral Non. */
+:root {
+  --bg1: #efe9ff;
+  --bg2: #d9f6ec;
+  --orb1: #ffd9ea;
+  --orb2: #c8ebff;
+  --fg: #2a2152;
+  --muted: #5d5589;
+  --ghost-a: #e4dbff;
+  --ghost-b: #a98cff;
+  --ink: #2a2152;
+  --cheek: #ff8fb1;
+  --shadow: rgba(60, 40, 140, 0.2);
+  --yes: #17a673;
+  --yes-d: #0e7a54;
+  --yes-glow: rgba(23, 166, 115, 0.5);
+  --no: #e5485f;
+  --no-d: #a52c40;
+  --no-glow: rgba(229, 72, 95, 0.5);
+  --btn-text: #ffffff;
+  --spark1: #ffc233;
+  --spark2: #ff7aa8;
+  --spark3: #4db8ff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg1: #1c1740;
+    --bg2: #12383b;
+    --orb1: #5a2a6e;
+    --orb2: #1f5a73;
+    --fg: #f4f0ff;
+    --muted: #bdb4e6;
+    --ghost-a: #f2edff;
+    --ghost-b: #b9a2ff;
+    --shadow: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg1: #1c1740;
+  --bg2: #12383b;
+  --orb1: #5a2a6e;
+  --orb2: #1f5a73;
+  --fg: #f4f0ff;
+  --muted: #bdb4e6;
+  --ghost-a: #f2edff;
+  --ghost-b: #b9a2ff;
+  --shadow: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  padding-block: 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background-color: var(--bg1);
+  background-image:
+    radial-gradient(48rem 36rem at 12% 8%, var(--orb1), transparent 62%),
+    radial-gradient(44rem 36rem at 92% 92%, var(--orb2), transparent 62%),
+    linear-gradient(160deg, var(--bg1), var(--bg2));
+  background-repeat: no-repeat;
+  color: var(--fg);
+  font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow-x: hidden;
+}
+
+.stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 3vh, 28px);
+  text-align: center;
+}
+
+/* Ghost */
+.ghost-wrap {
+  position: relative;
+  width: clamp(130px, min(40vw, 26vh), 220px);
+  animation: appear 1s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+.jumper.jump { animation: jump 0.95s ease-out; }
+.float { animation: float 4.2s ease-in-out 1s infinite; }
+.ghost-wrap svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 14px 16px var(--shadow));
+}
+.ground {
+  width: 62%;
+  height: 14px;
+  margin: 8px auto 0;
+  border-radius: 50%;
+  background: var(--shadow);
+  filter: blur(6px);
+  animation: ground 4.2s ease-in-out 1s infinite;
+}
+.eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 5.5s ease-in-out 1.6s infinite;
+}
+.eyes-happy, .mouth-happy { display: none; }
+svg.happy .eyes-open, svg.happy .mouth-calm { display: none; }
+svg.happy .eyes-happy, svg.happy .mouth-happy { display: inline; }
+svg.happy .cheek { opacity: 1; }
+
+.sp {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background: var(--c);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  opacity: 0;
+  animation: twinkle 2.8s ease-in-out infinite;
+}
+.s1 { --c: var(--spark1); top: 8%;  left: -12%; animation-delay: 1.3s; }
+.s2 { --c: var(--spark2); top: 24%; right: -16%; animation-delay: 1.9s; width: 12px; height: 12px; }
+.s3 { --c: var(--spark3); bottom: 36%; left: -20%; animation-delay: 2.4s; width: 11px; height: 11px; }
+.s4 { --c: var(--spark2); top: -3%; right: 14%; animation-delay: 2.0s; width: 10px; height: 10px; }
+.s5 { --c: var(--spark1); bottom: 42%; right: -8%; animation-delay: 1.6s; width: 13px; height: 13px; }
+
+/* Text and buttons */
+.panel {
+  width: 100%;
+  min-height: 14.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ask, .thanks {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(18px, 4vh, 32px);
+}
+h1 {
+  margin: 0;
+  max-width: 20ch;
+  font: 600 clamp(1.8rem, 6.4vw, 3.1rem) / 1.12 "Fredoka", "Nunito", system-ui, sans-serif;
+  text-wrap: balance;
+  animation: rise 0.7s ease 0.8s both;
+}
+.thanks h1 { animation-delay: 0s; }
+.thanks p {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--muted);
+  font-size: clamp(1rem, 3.4vw, 1.25rem);
+  font-weight: 500;
+  text-wrap: balance;
+  animation: rise 0.7s ease 0.15s both;
+}
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(14px, 4vw, 28px);
+  animation: fade 0.7s ease 1s both;
+}
+.slot { display: inline-block; }
+.btn {
+  min-width: clamp(130px, 38vw, 200px);
+  padding: 0.7em 1.2em;
+  border: 0;
+  border-radius: 999px;
+  background: var(--c);
+  color: var(--btn-text);
+  font: 600 clamp(1.5rem, 6vw, 2.2rem) / 1 "Fredoka", "Nunito", system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 0.22em 0 var(--cd), 0 0.7em 1.2em -0.25em var(--glow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover { transform: translateY(-3px); }
+.btn:active { transform: translateY(0.12em); box-shadow: 0 0.08em 0 var(--cd), 0 0.3em 0.8em -0.2em var(--glow); }
+.btn.yes { --c: var(--yes); --cd: var(--yes-d); --glow: var(--yes-glow); }
+.btn.no  { --c: var(--no);  --cd: var(--no-d);  --glow: var(--no-glow); }
+.btn.no.flying {
+  transition: left 0.5s cubic-bezier(0.3, 1.5, 0.5, 1), top 0.5s cubic-bezier(0.3, 1.5, 0.5, 1), transform 0.15s ease, box-shadow 0.15s ease;
+}
+.again {
+  padding: 0.55em 1.3em;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font: 700 1rem "Nunito", system-ui, sans-serif;
+  cursor: pointer;
+  opacity: 0.8;
+  animation: fade 0.7s ease 0.6s both;
+}
+.again:hover { opacity: 1; }
+button:focus-visible { outline: 4px solid var(--fg); outline-offset: 4px; }
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+@keyframes appear {
+  0%   { opacity: 0; transform: translateY(60px) scale(0.5); }
+  55%  { opacity: 1; transform: translateY(-14px) scale(1.07); }
+  80%  { transform: translateY(4px) scale(0.98); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes ground { 0%, 100% { transform: scaleX(1); opacity: 0.9; } 50% { transform: scaleX(0.8); opacity: 0.55; } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes twinkle {
+  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.15; }
+  50% { transform: scale(1) rotate(45deg); opacity: 1; }
+}
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes jump {
+  0%   { transform: translateY(0) scale(1, 1); }
+  18%  { transform: translateY(0) scale(1.1, 0.88); }
+  45%  { transform: translateY(-48px) scale(0.95, 1.07); }
+  72%  { transform: translateY(0) scale(1.07, 0.93); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float, .ground, .eye, .sp { animation: none; }
+  .sp { opacity: 0.8; transform: scale(0.8); }
+  .btn.no.flying { transition: none; }
+  .jumper.jump { animation: none; }
+}
+</style>
+
+<main class="stage">
+  <div class="ghost-wrap" id="ghostWrap">
+    <span class="sp s1"></span><span class="sp s2"></span><span class="sp s3"></span><span class="sp s4"></span><span class="sp s5"></span>
+    <div class="jumper" id="jumper">
+      <div class="float">
+        <svg id="ghost" viewBox="0 0 200 225" role="img" aria-label="Un petit fantôme lavande">
+          <defs>
+            <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" style="stop-color: var(--ghost-a)"/>
+              <stop offset="1" style="stop-color: var(--ghost-b)"/>
+            </linearGradient>
+          </defs>
+          <path d="M30 110 C30 58 62 24 100 24 C138 24 170 58 170 110 L170 175 Q146.7 228 123.3 175 Q100 228 76.7 175 Q53.3 228 30 175 Z" fill="url(#gBody)"/>
+          <ellipse cx="62" cy="64" rx="13" ry="22" transform="rotate(25 62 64)" fill="#ffffff" opacity="0.38"/>
+          <ellipse class="cheek" cx="58" cy="119" rx="10" ry="6.5" fill="var(--cheek)" opacity="0.8"/>
+          <ellipse class="cheek" cx="142" cy="119" rx="10" ry="6.5" fill="var(--cheek)" opacity="0.8"/>
+          <g class="eyes-open">
+            <g class="eye"><ellipse cx="78" cy="100" rx="8.5" ry="11.5" fill="var(--ink)"/><circle cx="81" cy="95.5" r="3" fill="#ffffff"/></g>
+            <g class="eye"><ellipse cx="122" cy="100" rx="8.5" ry="11.5" fill="var(--ink)"/><circle cx="125" cy="95.5" r="3" fill="#ffffff"/></g>
+          </g>
+          <g class="eyes-happy" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round">
+            <path d="M67 106 Q78 90 89 106"/>
+            <path d="M111 106 Q122 90 133 106"/>
+          </g>
+          <path class="mouth-calm" d="M91 121 Q100 130 109 121" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
+          <g class="mouth-happy">
+            <path d="M86 118 Q100 150 114 118 Z" fill="var(--ink)"/>
+            <ellipse cx="100" cy="130" rx="6.5" ry="3.8" fill="var(--cheek)"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="ground"></div>
+  </div>
+
+  <div class="panel">
+    <section class="ask" id="ask">
+      <h1>As-tu le temps d’installer Snap ?</h1>
+      <div class="choices">
+        <button class="btn yes" id="yes" type="button">Oui</button>
+        <span class="slot" id="slot"><button class="btn no" id="no" type="button">Non</button></span>
+      </div>
+    </section>
+    <section class="thanks" id="thanks" hidden aria-live="polite">
+      <h1>Merci beaucoup !</h1>
+      <p>Tu viens de rendre ce fantôme très heureux.</p>
+      <button class="again" id="again" type="button">Recommencer</button>
+    </section>
+  </div>
+</main>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var yes = $('yes'), no = $('no'), slot = $('slot'), ask = $('ask'), thanks = $('thanks');
+  var again = $('again'), ghost = $('ghost'), wrap = $('ghostWrap'), jumper = $('jumper');
+  var cv = $('confetti'), ctx = cv.getContext('2d');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Le bouton « Non » qui fuit à l'infini ---------- */
+  var detached = false, lastMove = 0;
+
+  function detach() {
+    if (detached) return;
+    var r = no.getBoundingClientRect();
+    slot.style.width = r.width + 'px';
+    slot.style.height = r.height + 'px';
+    no.style.width = r.width + 'px';
+    no.style.position = 'fixed';
+    no.style.margin = '0';
+    no.style.left = r.left + 'px';
+    no.style.top = r.top + 'px';
+    no.style.zIndex = '20';
+    detached = true;
+    void no.offsetWidth;
+    no.classList.add('flying');
+  }
+
+  function hit(a, b, pad) {
+    return !(a.right + pad < b.left || a.left - pad > b.right || a.bottom + pad < b.top || a.top - pad > b.bottom);
+  }
+
+  function moveNo() {
+    var now = Date.now();
+    if (now - lastMove < 280) return;
+    lastMove = now;
+    detach();
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var w = no.offsetWidth, h = no.offsetHeight, m = 16;
+    var cur = no.getBoundingClientRect();
+    var yr = yes.getBoundingClientRect();
+    var tr = ask.querySelector('h1').getBoundingClientRect();
+    var gr = wrap.getBoundingClientRect();
+    var minD = Math.min(vw, vh) * 0.3;
+    var perfect = null, ok = null;
+    for (var i = 0; i < 80; i++) {
+      var x = m + Math.random() * Math.max(0, vw - w - 2 * m);
+      var y = m + Math.random() * Math.max(0, vh - h - 2 * m);
+      var r = { left: x, top: y, right: x + w, bottom: y + h };
+      if (hit(r, yr, 24)) continue;
+      var far = Math.hypot(x - cur.left, y - cur.top) > minD;
+      var clear = !hit(r, tr, 12) && !hit(r, gr, 8);
+      if (far && clear) { perfect = { x: x, y: y }; break; }
+      if (far && !ok) ok = { x: x, y: y };
+    }
+    var p = perfect || ok || { x: m, y: m };
+    no.style.left = p.x + 'px';
+    no.style.top = p.y + 'px';
+  }
+
+  no.addEventListener('pointerenter', moveNo);
+  no.addEventListener('pointerdown', function (e) { e.preventDefault(); moveNo(); });
+  no.addEventListener('click', function (e) { e.preventDefault(); moveNo(); });
+
+  window.addEventListener('resize', function () {
+    size();
+    if (!detached) return;
+    var vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var r = no.getBoundingClientRect();
+    no.style.left = Math.max(16, Math.min(r.left, vw - r.width - 16)) + 'px';
+    no.style.top = Math.max(16, Math.min(r.top, vh - r.height - 16)) + 'px';
+  });
+
+  /* ---------- Oui : célébration ---------- */
+  yes.addEventListener('click', function () {
+    ask.hidden = true;
+    no.hidden = true;
+    thanks.hidden = false;
+    ghost.classList.add('happy');
+    jumper.classList.remove('jump');
+    void jumper.offsetWidth;
+    jumper.classList.add('jump');
+    fire();
+    again.focus({ preventScroll: true });
+  });
+
+  again.addEventListener('click', function () {
+    thanks.hidden = true;
+    ask.hidden = false;
+    no.hidden = false;
+    ghost.classList.remove('happy');
+    jumper.classList.remove('jump');
+    yes.focus({ preventScroll: true });
+  });
+
+  /* ---------- Confettis ---------- */
+  var W = 0, H = 0, DPR = 1, parts = [], running = false, rainUntil = 0;
+  var COLORS = ['#ff5f93', '#ffc233', '#2fd39b', '#4db8ff', '#a98bff', '#ff9a4d', '#2ad4d4'];
+  var SHAPES = ['rect', 'rect', 'circle', 'star', 'ribbon'];
+
+  function size() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  size();
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  function spawn(x, y, angle, spread, speed) {
+    if (parts.length > 900) return;
+    var a = angle + rnd(-spread, spread);
+    var v = speed * rnd(0.5, 1);
+    parts.push({
+      x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+      size: rnd(7, 13),
+      color: COLORS[(Math.random() * COLORS.length) | 0],
+      shape: SHAPES[(Math.random() * SHAPES.length) | 0],
+      rot: rnd(0, 6.28), vr: rnd(-0.22, 0.22),
+      tilt: rnd(0, 6.28), vt: rnd(0.08, 0.28),
+      drag: rnd(0.945, 0.972),
+      life: 0, max: rnd(190, 320)
+    });
+  }
+
+  function drawStar(r) {
+    ctx.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var rad = i % 2 === 0 ? r : r * 0.45;
+      var ang = -Math.PI / 2 + i * Math.PI / 5;
+      ctx.lineTo(Math.cos(ang) * rad, Math.sin(ang) * rad);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    var now = performance.now();
+    if (now < rainUntil) {
+      for (var k = 0; k < 3; k++) spawn(rnd(0, W), -16, Math.PI / 2, 0.6, rnd(2, 4));
+    }
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      p.vx *= p.drag; p.vy = (p.vy + 0.26) * p.drag;
+      p.vx += Math.sin(p.tilt) * 0.12;
+      p.x += p.vx; p.y += p.vy;
+      p.rot += p.vr; p.tilt += p.vt; p.life++;
+      if (p.life > p.max || p.y > H + 40) { parts.splice(i, 1); continue; }
+      var alpha = p.life > p.max - 40 ? (p.max - p.life) / 40 : 1;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.scale(1, Math.cos(p.tilt));
+      ctx.fillStyle = p.color;
+      var s = p.size;
+      if (p.shape === 'rect') ctx.fillRect(-s / 2, -s / 3, s, s * 0.66);
+      else if (p.shape === 'ribbon') ctx.fillRect(-s * 0.18, -s * 1.1, s * 0.36, s * 2.2);
+      else if (p.shape === 'circle') { ctx.beginPath(); ctx.arc(0, 0, s * 0.4, 0, 6.2832); ctx.fill(); }
+      else drawStar(s * 0.65);
+      ctx.restore();
+    }
+    if (parts.length || performance.now() < rainUntil) requestAnimationFrame(tick);
+    else { running = false; ctx.clearRect(0, 0, W, H); }
+  }
+
+  function fire() {
+    var m = reduce ? 0.4 : 1;
+    var s = Math.max(0.75, Math.min(1.4, Math.min(W, H) / 700));
+    var up = -Math.PI / 2;
+    function center(n) { for (var i = 0; i < n * m; i++) spawn(W / 2, H * 0.42, up, Math.PI * 0.95, 17 * s); }
+    function cannons(n) {
+      for (var i = 0; i < n * m; i++) {
+        spawn(0, H, up + 0.55, 0.35, 31 * s);
+        spawn(W, H, up - 0.55, 0.35, 31 * s);
+      }
+    }
+    center(100); cannons(60);
+    setTimeout(function () { cannons(55); ensureRunning(); }, 280);
+    setTimeout(function () { center(70); ensureRunning(); }, 650);
+    if (!reduce) rainUntil = performance.now() + 3400;
+    ensureRunning();
+  }
+
+  function ensureRunning() {
+    if (!running) { running = true; requestAnimationFrame(tick); }
+  }
+})();
+</script>
+
+</body></html>
